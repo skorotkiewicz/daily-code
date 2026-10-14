@@ -79,16 +79,16 @@ def full_output(date_text):
 
 
 check(
-    "1991-01-1 (single-digit day) -> 552596 snugly-achiness",
-    full_output("1991-01-1") == "552596  (1991-01-01, secret: 'snugly-achiness')",
+    "1991-01-1 (single-digit day) -> 668558 vanquish-afraid",
+    full_output("1991-01-1") == "668558  (1991-01-01, secret: 'vanquish-afraid')",
 )
 check(
-    "1991-01-2 (single-digit day) -> 273897 chatter-aggregate",
-    full_output("1991-01-2") == "273897  (1991-01-02, secret: 'chatter-aggregate')",
+    "1991-01-2 (single-digit day) -> 474543 angriness-alongside",
+    full_output("1991-01-2") == "474543  (1991-01-02, secret: 'angriness-alongside')",
 )
 check(
-    "1991-01-3 (single-digit day) -> 186856 charity-amendment",
-    full_output("1991-01-3") == "186856  (1991-01-03, secret: 'charity-amendment')",
+    "1991-01-3 (single-digit day) -> 904406 stumble-accent",
+    full_output("1991-01-3") == "904406  (1991-01-03, secret: 'stumble-accent')",
 )
 check(
     "1991-01-01 (padded) gives the same code as 1991-01-1",

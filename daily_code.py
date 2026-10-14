@@ -30,7 +30,10 @@ from datetime import date, datetime, timedelta, timezone
 EPOCH = date(1000, 1, 1)  # day 0 - supports years 1000 to ~3464
 CODE_LOW = 100_000        # codes never start with 0: range 100000..999999
 CODE_COUNT = 900_000      # 900,000 unique codes - one per day
-DEFAULT_SECRET = "unguessable-hamster"
+# Demo secret - fine for trying it out. For real use, change it to something
+# long and private here, or (better) set the DAILY_CODE_SECRET environment
+# variable. Changing it changes every code, so pick one and keep it.
+DEFAULT_SECRET = "demo"
 
 # The EFF large wordlist (7,776 real English words) - the published diceware
 # standard. Downloaded ONCE, cached, filtered to 6+ letters. NEVER generated.
