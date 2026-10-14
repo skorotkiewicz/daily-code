@@ -50,9 +50,13 @@ def _eff_words() -> list:
         try:
             with urllib.request.urlopen(_EFF_URL, timeout=4) as response:
                 text = response.read().decode()
-            words = sorted({line.split()[1].lower() for line in text.splitlines()
-                            if len(line.split()) == 2 and len(line.split()[1]) >= 6
-                            and line.split()[1].isalpha()})
+            words = sorted({
+                line.split()[1].lower()
+                for line in text.splitlines()
+                if len(line.split()) == 2
+                and len(line.split()[1]) >= 6
+                and line.split()[1].isalpha()
+            })
             with open(_EFF_CACHE, "w", encoding="utf-8") as fh:
                 fh.write("\n".join(words))
             _EFF_CACHE_DATA = words
@@ -114,6 +118,7 @@ def _walk(value: int, step) -> int:
         value = step(value)
     return value
 
+
 # def key_material() -> tuple[int, int]:
 #     """Derive an invertible multiplier `a` and offset `b` from the secret.
 #     a must be coprime with 10^12 = 2^12 · 5^12 (odd, not divisible by 5)."""
@@ -172,10 +177,16 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     gen = sub.add_parser("generate", help="the code for a day (default: today, UTC)")
-    gen.add_argument("--date", type=parse_date, default=None,
-                     help="YYYY-MM-DD (default: today, UTC)")
-    gen.add_argument("--days", type=int, default=None, metavar="N",
-                     help="show the code for each of the next N days")
+    gen.add_argument(
+        "--date", type=parse_date, default=None, help="YYYY-MM-DD (default: today, UTC)"
+    )
+    gen.add_argument(
+        "--days",
+        type=int,
+        default=None,
+        metavar="N",
+        help="show the code for each of the next N days",
+    )
     rev = sub.add_parser("reverse", help="decode a code back to its day")
     rev.add_argument("code", help="6 digits, e.g. 332231 or 332-231")
 

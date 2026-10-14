@@ -40,8 +40,10 @@ for i in range(dc.CODE_COUNT):  # every supported day — exhaustive
     if c[0] == "0":
         zeros += 1
     codes.add(c)
-check(f"{dc.CODE_COUNT} days -> {len(codes)} unique codes, {dups} duplicates",
-      dups == 0 and len(codes) == dc.CODE_COUNT)
+check(
+    f"{dc.CODE_COUNT} days -> {len(codes)} unique codes, {dups} duplicates",
+    dups == 0 and len(codes) == dc.CODE_COUNT,
+)
 check("no code starts with 0", zeros == 0)
 
 # --- 4. reverse -> exact day --------------------------------------------
@@ -60,26 +62,38 @@ dc.secret = lambda: "another-secret-42"
 code_other = dc.code_for(dc.parse_date("2026-10-14"))
 dc.secret = original_secret
 check("different secret -> different code", code_default != code_other)
-check("reverse still works with original secret",
-      dc.day_from_code(code_default) == dc.parse_date("2026-10-14"))
+check(
+    "reverse still works with original secret",
+    dc.day_from_code(code_default) == dc.parse_date("2026-10-14"),
+)
 
 # --- 6. exact outputs (user-verified examples) --------------------------
 # These are the real outputs from the user's terminal (main branch).
 # If any of these change, the algorithm changed — the test fails loudly.
+
 
 def full_output(date_text):
     """Replicate what `generate --date` prints."""
     day = dc.parse_date(date_text)
     return f"{dc.code_for(day)}  ({day.isoformat()}, secret: '{dc.words_for(day)}')"
 
-check("1991-01-1 (single-digit day) -> 552596 snugly-achiness",
-      full_output("1991-01-1") == "552596  (1991-01-01, secret: 'snugly-achiness')")
-check("1991-01-2 (single-digit day) -> 273897 chatter-aggregate",
-      full_output("1991-01-2") == "273897  (1991-01-02, secret: 'chatter-aggregate')")
-check("1991-01-3 (single-digit day) -> 186856 charity-amendment",
-      full_output("1991-01-3") == "186856  (1991-01-03, secret: 'charity-amendment')")
-check("1991-01-01 (padded) gives the same code as 1991-01-1",
-      dc.code_for(dc.parse_date("1991-01-01")) == dc.code_for(dc.parse_date("1991-01-1")))
+
+check(
+    "1991-01-1 (single-digit day) -> 552596 snugly-achiness",
+    full_output("1991-01-1") == "552596  (1991-01-01, secret: 'snugly-achiness')",
+)
+check(
+    "1991-01-2 (single-digit day) -> 273897 chatter-aggregate",
+    full_output("1991-01-2") == "273897  (1991-01-02, secret: 'chatter-aggregate')",
+)
+check(
+    "1991-01-3 (single-digit day) -> 186856 charity-amendment",
+    full_output("1991-01-3") == "186856  (1991-01-03, secret: 'charity-amendment')",
+)
+check(
+    "1991-01-01 (padded) gives the same code as 1991-01-1",
+    dc.code_for(dc.parse_date("1991-01-01")) == dc.code_for(dc.parse_date("1991-01-1")),
+)
 
 # --- summary -------------------------------------------------------------
 print("-" * 46)

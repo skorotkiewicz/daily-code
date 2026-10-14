@@ -27,14 +27,16 @@ import urllib.request
 from datetime import date, datetime, timedelta, timezone
 
 EPOCH = date(1000, 1, 1)  # day 0 — supports years 1000 to ~3464
-CODE_LOW = 100_000        # codes never start with 0: range 100000..999999
-CODE_COUNT = 900_000      # 900,000 unique codes — one per day
+CODE_LOW = 100_000  # codes never start with 0: range 100000..999999
+CODE_COUNT = 900_000  # 900,000 unique codes — one per day
 DEFAULT_SECRET = "unguessable-hamster"
 
 # The EFF large wordlist (7,776 real English words) — the published diceware
 # standard. Downloaded ONCE, cached, filtered to 6+ letters. NEVER generated.
 _EFF_URL = "https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt"
-_EFF_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eff_long_words.txt")
+_EFF_CACHE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "eff_long_words.txt"
+)
 _EFF_CACHE_DATA = None
 
 
@@ -49,9 +51,15 @@ def _eff_words() -> list:
         try:
             with urllib.request.urlopen(_EFF_URL, timeout=4) as response:
                 text = response.read().decode()
-            words = sorted({line.split()[1].lower() for line in text.splitlines()
-                            if len(line.split()) == 2 and len(line.split()[1]) >= 6
-                            and line.split()[1].isalpha()})
+            words = sorted(
+                {
+                    line.split()[1].lower()
+                    for line in text.splitlines()
+                    if len(line.split()) == 2
+                    and len(line.split()[1]) >= 6
+                    and line.split()[1].isalpha()
+                }
+            )
             with open(_EFF_CACHE, "w", encoding="utf-8") as fh:
                 fh.write("\n".join(words))
             _EFF_CACHE_DATA = words
@@ -133,10 +141,16 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
 
     gen = sub.add_parser("generate", help="the code for a day (default: today, UTC)")
-    gen.add_argument("--date", type=parse_date, default=None,
-                     help="YYYY-MM-DD (default: today, UTC)")
-    gen.add_argument("--days", type=int, default=None, metavar="N",
-                     help="show the code for each of the next N days")
+    gen.add_argument(
+        "--date", type=parse_date, default=None, help="YYYY-MM-DD (default: today, UTC)"
+    )
+    gen.add_argument(
+        "--days",
+        type=int,
+        default=None,
+        metavar="N",
+        help="show the code for each of the next N days",
+    )
     rev = sub.add_parser("reverse", help="decode a code back to its day")
     rev.add_argument("code", help="6 digits, e.g. 332231 or 332-231")
 
