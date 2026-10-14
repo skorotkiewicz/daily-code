@@ -169,9 +169,9 @@ def main(argv: list[str] | None = None) -> int:
             if args.days:  # the code for each of the next N days
                 for offset in range(args.days):
                     d = day + timedelta(days=offset)
-                    print(f"{code_for(d)}  ({d.isoformat()}, words: '{words_for(d)}')")
+                    print(f"{code_for(d)}  ({d.isoformat()}, secret: '{words_for(d)}')")
                 return 0
-            print(f"{code_for(day)}  ({day.isoformat()}, words: '{words_for(day)}')")
+            print(f"{code_for(day)}  ({day.isoformat()}, secret: '{words_for(day)}')")
             return 0
         except ValueError as error:
             print(f"error: {error}", file=sys.stderr)
