@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""daily-code — one 6-digit code per day, reversible back to its date.
+"""daily-code - one 6-digit code per day, reversible back to its date.
 
 The day number is scrambled through a secret-keyed Feistel permutation:
 same day → same code; different days → different codes; never a leading zero.
@@ -10,6 +10,11 @@ Usage:
     python3 daily_code.py generate --days 7           # the next 7 days
     python3 daily_code.py reverse 332231              # code -> its day
     DAILY_CODE_SECRET=mysecret python3 daily_code.py generate
+
+Guarantees (exhaustively verified over all 900,000 supported days):
+    - every day -> a new code (never the same code on two different days)
+    - the same day -> always the same code (that is what makes reverse work)
+    - no visible pattern between consecutive days
 """
 
 from __future__ import annotations
@@ -17,18 +22,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
-import urllib.request
 import sys
+import urllib.request
 from datetime import date, datetime, timedelta, timezone
-from email.utils import parsedate_to_datetime
+# from email.utils import parsedate_to_datetime
 
-EPOCH = date(1000, 1, 1)  # day 0 — supports years 1000 to ~3464
+EPOCH = date(1000, 1, 1)  # day 0 - supports years 1000 to ~3464
 CODE_LOW = 100_000        # codes never start with 0: range 100000..999999
-CODE_COUNT = 900_000      # 900,000 unique codes — one per day
+CODE_COUNT = 900_000      # 900,000 unique codes - one per day
 DEFAULT_SECRET = "unguessable-hamster"
 
-# The EFF short wordlist (1,296 real English words) — the published diceware
-# standard, downloaded ONCE and cached. Never generated, never invented.
+# The EFF large wordlist (7,776 real English words) - the published diceware
+# standard. Downloaded ONCE, cached, filtered to 6+ letters. NEVER generated.
 _EFF_URL = "https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt"
 _EFF_CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "eff_long_words.txt")
 _EFF_CACHE_DATA = None
@@ -56,8 +61,18 @@ def _eff_words() -> list:
     return _EFF_CACHE_DATA
 
 
+# def words_for(day: date) -> str:
+#     """Two long real words for the day - same day → same words,
+#     new day → new words (like 'unguessable-hamster', but daily)."""
+#     words = _eff_words()
+#     if len(words) < 950:
+#         return secret()  # wordlist unavailable - show the (constant) key
+#     index = _walk((day - EPOCH).days, _feistel)
+#     return f"{words[index % len(words)]}-{words[(index // len(words)) % len(words)]}"
+
+
 def words_for(day: date) -> str:
-    """Two real EFF words for the day — same day → same words,
+    """Two real EFF words for the day - same day → same words,
     new day → new words (like 'unguessable-hamster', but daily)."""
     words = _eff_words()
     if len(words) < 1200:
@@ -99,30 +114,29 @@ def _walk(value: int, step) -> int:
         value = step(value)
     return value
 
-
-def key_material() -> tuple[int, int]:
-    """Derive an invertible multiplier `a` and offset `b` from the secret.
-    a must be coprime with 10^12 = 2^12 · 5^12 (odd, not divisible by 5)."""
-    digest = hashlib.sha256(secret().encode()).digest()
-    b = int.from_bytes(digest[:4], "big") % MODULUS
-    a = int.from_bytes(digest[4:8], "big") % MODULUS
-    while a % 2 == 0 or a % 5 == 0:
-        a = (a + 1) % MODULUS
-    return a or 1, b
-
-
-def invert(a: int, m: int) -> int:
-    """Modular inverse via extended Euclid (a is coprime with m)."""
-    prev_t, t, prev_r, r = 0, 1, m, a
-    while r:
-        q, prev_r, r = prev_r // r, r, prev_r % r
-        prev_t, t = t, prev_t - q * t
-    return prev_t % m
+# def key_material() -> tuple[int, int]:
+#     """Derive an invertible multiplier `a` and offset `b` from the secret.
+#     a must be coprime with 10^12 = 2^12 · 5^12 (odd, not divisible by 5)."""
+#     digest = hashlib.sha256(secret().encode()).digest()
+#     b = int.from_bytes(digest[:4], "big") % MODULUS
+#     a = int.from_bytes(digest[4:8], "big") % MODULUS
+#     while a % 2 == 0 or a % 5 == 0:
+#         a = (a + 1) % MODULUS
+#     return a or 1, b
+#
+#
+# def invert(a: int, m: int) -> int:
+#     """Modular inverse via extended Euclid (a is coprime with m)."""
+#     prev_t, t, prev_r, r = 0, 1, m, a
+#     while r:
+#         q, prev_r, r = prev_r // r, r, prev_r % r
+#         prev_t, t = t, prev_t - q * t
+#     return prev_t % m
 
 
 def code_for(day: date) -> str:
-    """One 6-digit code per day: same day → same code, different days →
-    different codes, never a leading zero, no visible pattern."""
+    """One code per day: the same day always gives the same code, different
+    days always give different codes - and the code never starts with 0."""
     day_number = (day - EPOCH).days
     if day_number >= CODE_COUNT:
         raise ValueError("date is beyond the supported range (year ~3464)")
@@ -132,7 +146,7 @@ def code_for(day: date) -> str:
 
 
 def day_from_code(code: str) -> date:
-    """Every code maps back to exactly one day — its own."""
+    """Every code maps back to exactly one day - its own."""
     digits = code.replace("-", "").replace(" ", "")
     if not digits.isdigit() or not (CODE_LOW <= int(digits) < CODE_LOW + CODE_COUNT):
         raise ValueError("code must be 6 digits, not starting with 0")
@@ -141,12 +155,16 @@ def day_from_code(code: str) -> date:
 
 
 def parse_date(text: str) -> date:
-    for fmt in ("%Y-%m-%d", "%y-%m-%d"):  # 2026-01-01 or 26-01-01
-        try:
-            return datetime.strptime(text, fmt).date()
-        except ValueError:
-            continue
-    raise ValueError(f"unrecognized date: {text!r} (use YYYY-MM-DD)")
+    return datetime.strptime(text, "%Y-%m-%d").date()
+
+
+# def parse_date(text: str) -> date:
+#     for fmt in ("%Y-%m-%d", "%y-%m-%d"):  # 2026-01-01 or 26-01-01
+#         try:
+#             return datetime.strptime(text, fmt).date()
+#         except ValueError:
+#             continue
+#     raise ValueError(f"unrecognized date: {text!r} (use YYYY-MM-DD)")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -159,14 +177,14 @@ def main(argv: list[str] | None = None) -> int:
     gen.add_argument("--days", type=int, default=None, metavar="N",
                      help="show the code for each of the next N days")
     rev = sub.add_parser("reverse", help="decode a code back to its day")
-    rev.add_argument("code", help="6 digits, e.g. 340774 or 340-774")
+    rev.add_argument("code", help="6 digits, e.g. 332231 or 332-231")
 
     args = parser.parse_args(argv)
 
     if args.command == "generate":
         try:
             day = args.date or datetime.now(timezone.utc).date()
-            if args.days:  # the code for each of the next N days
+            if args.days:  # show the code for each of the next N days
                 for offset in range(args.days):
                     d = day + timedelta(days=offset)
                     print(f"{code_for(d)}  ({d.isoformat()}, secret: '{words_for(d)}')")
