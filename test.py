@@ -63,6 +63,24 @@ check("different secret -> different code", code_default != code_other)
 check("reverse still works with original secret",
       dc.day_from_code(code_default) == dc.parse_date("2026-10-14"))
 
+# --- 6. exact outputs (user-verified examples) --------------------------
+# These are the real outputs from the user's terminal (main branch).
+# If any of these change, the algorithm changed — the test fails loudly.
+
+def full_output(date_text):
+    """Replicate what `generate --date` prints."""
+    day = dc.parse_date(date_text)
+    return f"{dc.code_for(day)}  ({day.isoformat()}, secret: '{dc.words_for(day)}')"
+
+check("1991-01-1 (single-digit day) -> 552596 snugly-achiness",
+      full_output("1991-01-1") == "552596  (1991-01-01, secret: 'snugly-achiness')")
+check("1991-01-2 (single-digit day) -> 273897 chatter-aggregate",
+      full_output("1991-01-2") == "273897  (1991-01-02, secret: 'chatter-aggregate')")
+check("1991-01-3 (single-digit day) -> 186856 charity-amendment",
+      full_output("1991-01-3") == "186856  (1991-01-03, secret: 'charity-amendment')")
+check("1991-01-01 (padded) gives the same code as 1991-01-1",
+      dc.code_for(dc.parse_date("1991-01-01")) == dc.code_for(dc.parse_date("1991-01-1")))
+
 # --- summary -------------------------------------------------------------
 print("-" * 46)
 print("ALL TESTS PASSED" if failures == 0 else f"{failures} TEST(S) FAILED")
