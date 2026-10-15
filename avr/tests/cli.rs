@@ -33,17 +33,29 @@ fn secret_and_today() {
         .output()
         .unwrap();
     assert!(output.status.success());
-    assert_eq!(output.stdout, b"852991  (1000-01-01, secret: 'footsie-amends')\n");
+    assert_eq!(
+        output.stdout,
+        b"852991  (1000-01-01, secret: 'footsie-amends')\n"
+    );
 
-    let before = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap();
+    let before = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap();
     let output = run(&["generate"]);
-    let after = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap();
+    let after = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap();
     assert!(output.status.success());
     let text = String::from_utf8(output.stdout).unwrap();
     let code = text.split_whitespace().next().unwrap();
-    let date = daily_code::DailyCode::new("demo").day_from_code(code).unwrap();
+    let date = daily_code::DailyCode::new("demo")
+        .day_from_code(code)
+        .unwrap();
     assert!([before, after].into_iter().any(|instant| {
-        time::OffsetDateTime::from_unix_timestamp(instant.as_secs() as i64).unwrap().date() == date
+        time::OffsetDateTime::from_unix_timestamp(instant.as_secs() as i64)
+            .unwrap()
+            .date()
+            == date
     }));
 }
 

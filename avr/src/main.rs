@@ -83,13 +83,23 @@ unsafe fn run(arguments: &[*const libc::c_char]) -> Result<(), &'static str> {
             while let Some(option) = args.next().transpose()? {
                 match option {
                     "--date" if date.is_none() => {
-                        date = Some(parse_date(args.next().transpose()?.ok_or("--date needs a value")?)?);
+                        date = Some(parse_date(
+                            args.next().transpose()?.ok_or("--date needs a value")?,
+                        )?);
                     }
                     "--days" if days.is_none() => {
                         let value = args.next().transpose()?.ok_or("--days needs a value")?;
-                        days = Some(value.parse::<u32>().ok().filter(|&n| n > 0).ok_or("--days must be a positive integer")?);
+                        days = Some(
+                            value
+                                .parse::<u32>()
+                                .ok()
+                                .filter(|&n| n > 0)
+                                .ok_or("--days must be a positive integer")?,
+                        );
                     }
-                    "--help" | "-h" => return writeln!(output, "{USAGE}").map_err(|_| "could not write output"),
+                    "--help" | "-h" => {
+                        return writeln!(output, "{USAGE}").map_err(|_| "could not write output");
+                    }
                     _ => return Err("unknown or repeated generate option; use --help"),
                 }
             }
@@ -148,7 +158,10 @@ extern "C" fn rust_eh_personality() -> ! {
 
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo<'_>) -> ! {
-    let _ = writeln!(Output(libc::STDERR_FILENO), "fatal: internal daily-code error");
+    let _ = writeln!(
+        Output(libc::STDERR_FILENO),
+        "fatal: internal daily-code error"
+    );
     // SAFETY: abort terminates the process without unwinding across the C runtime.
     unsafe { libc::abort() }
 }

@@ -182,16 +182,35 @@ mod tests {
     #[test]
     fn validation() {
         let generator = DailyCode::new(DEFAULT_SECRET);
-        for text in ["", "1991-02-29", "2000-13-01", "0000-01-01", "1991-001-1", "+991-1-1", "1991-1-1-extra"] {
+        for text in [
+            "",
+            "1991-02-29",
+            "2000-13-01",
+            "0000-01-01",
+            "1991-001-1",
+            "+991-1-1",
+            "1991-1-1-extra",
+        ] {
             assert!(parse_date(text).is_err(), "{text}");
         }
         assert!(parse_date("2000-2-29").is_ok());
         assert!(parse_date("1900-2-29").is_err());
-        for day in [EPOCH - Duration::days(1), EPOCH + Duration::days(i64::from(CODE_COUNT))] {
+        for day in [
+            EPOCH - Duration::days(1),
+            EPOCH + Duration::days(i64::from(CODE_COUNT)),
+        ] {
             assert!(generator.code_for(day).is_err());
             assert!(generator.words_for(day).is_err());
         }
-        for code in ["", "99999", "1000000", "0668558", "000000", "abc123", "１２３４５６"] {
+        for code in [
+            "",
+            "99999",
+            "1000000",
+            "0668558",
+            "000000",
+            "abc123",
+            "１２３４５６",
+        ] {
             assert!(generator.day_from_code(code).is_err(), "{code}");
         }
         assert_eq!(generator.day_from_code("668-558"), parse_date("1991-01-01"));
