@@ -9,9 +9,9 @@ The supported dates are 1000-01-01 through 3464-02-12.
 The release build and all six tests pass, including exhaustive uniqueness and
 reversal checks across all 900,000 supported days.
 
-The word list is bundled as `src/eff_long_words.txt` and embedded with
-`include_str!("./eff_long_words.txt")`. The path is relative to `src/lib.rs`,
-not the directory where the executable runs.
+The word list is shared with the Python version at the repository root and
+embedded with `include_str!("../../eff_long_words.txt")`. The path is relative
+to `src/lib.rs`, not the directory where the executable runs.
 
 Despite the directory name, the current CLI targets Linux, not AVR hardware.
 
@@ -19,7 +19,7 @@ Despite the directory name, the current CLI targets Linux, not AVR hardware.
 
 - Rust with edition 2024 support and Cargo.
 - A Linux host with a C linker and libc for the CLI.
-- The bundled `src/eff_long_words.txt` available at compile time.
+- The repository's `../eff_long_words.txt` available at compile time.
 
 Both the library and CLI use `no_std` and require no Rust heap allocation.
 The CLI uses libc for startup, arguments, environment variables, UTC time, and
