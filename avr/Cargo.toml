@@ -1,0 +1,23 @@
+[package]
+name = "daily-code"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sha2 = { version = "0.10.9", default-features = false }
+time = { version = "0.3", default-features = false }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+libc = { version = "0.2", default-features = false }
+
+[[bin]]
+name = "daily-code"
+path = "src/main.rs"
+test = false
+bench = false
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
